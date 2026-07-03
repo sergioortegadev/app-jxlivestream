@@ -1,0 +1,21 @@
+import { StackScreenProps } from "@react-navigation/stack";
+import { Text, View } from "react-native";
+import { RootStackParamList } from "../../navigation/StackNavigation";
+
+type Props = StackScreenProps<RootStackParamList, "Details">;
+
+export const DetailsScreen = ({ route }: Props) => {
+  const { id } = route.params;
+
+  return (
+    <View>
+        <Text>DetailsScreen</Text>
+        <Text>DetailsScreen</Text>
+        <Text>DetailsScreen</Text>
+        <Text>DetailsScreen</Text>
+        <Text>DetailsScreen</Text>
+        <Text>DetailsScreen</Text>
+        <Text>DetailsScreen, ID: {id}</Text>
+    </View>
+  )
+}
