@@ -1,6 +1,7 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeSreen } from "../screens/home/HomeScreen";
-import { Player } from "../screens/player/Player";
+import { PlayerScreen } from "../screens/player/PlayerScreen";
 import { RadioPageWV } from "../screens/radioPageWV/RadioPageWV";
 import { Platform } from "react-native";
 import { colors } from "../themes/theme";
@@ -47,7 +48,7 @@ export const AppBottomTabs = () => {
                 tabBarIcon: ({ color, size }) => <Icon name='home-outline' color={color} size={size} />,
                 sceneStyle:{ backgroundColor: colors.background}
             }}/>
-            <Tab.Screen name='Player' component={Player} 
+            <Tab.Screen name='Player' component={PlayerScreen} 
             options={{
                 title: 'Play',
                 tabBarIcon: ({ color, size }) => <Icon name='play-outline' color={color} size={size} />,

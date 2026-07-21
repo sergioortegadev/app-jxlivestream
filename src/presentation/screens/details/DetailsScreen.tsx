@@ -4,7 +4,7 @@ import { RootStackParamList } from "../../navigation/StackNavigation";
 
 type Props = StackScreenProps<RootStackParamList, "Details">;
 
-export const DetailsScreen = ({ route }: Props) => {
+export const DetailsScreen: React.FC<Props>  = ({ route }) => {
   const { id } = route.params;
 
   return (

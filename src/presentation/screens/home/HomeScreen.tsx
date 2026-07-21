@@ -4,7 +4,7 @@ interface Props {
 
 }
 
-export const HomeSreen = ({}: Props) => {
+export const HomeSreen: React.FC  = ({}: Props) => {
   return (
     <View>
         <Text>Home Sreen</Text>
