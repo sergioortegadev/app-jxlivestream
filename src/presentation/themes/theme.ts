@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { TimerDisplay } from '../../components/TimerDisplay';
 
 export interface ThemeColors {
   main: string,
@@ -12,6 +13,8 @@ export interface ThemeColors {
   liveColor: string;
   offlineColor: string;
   grayBgColor: string;
+  darkGrayBgColor: string;
+  TimerDisplay: string;
 }
 
 export const colors: ThemeColors = {
@@ -25,9 +28,11 @@ export const colors: ThemeColors = {
 
   // Player
   blueBtn: '#667eea',
+  TimerDisplay: '#667eea50',
   liveColor: '#20ac51',
   offlineColor: '#e74c3c',
   grayBgColor: '#bbb',
+  darkGrayBgColor: '#333',
 };
 
 export const globalStyles = StyleSheet.create({
@@ -48,6 +53,7 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   mainContainerCentered: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -96,11 +102,7 @@ export const globalStyles = StyleSheet.create({
     marginVertical: 5,
   },
 
-  // Webview
-  webview: {
-    flex: 1,
-  },
-
+  
   // PlayerScreen
   player: {
     width: 0,
@@ -139,7 +141,7 @@ export const globalStyles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-
+  
   // Reconnecting
   reconnectingCard: {
     alignItems: 'center',
@@ -151,7 +153,7 @@ export const globalStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-
+  
   // Error
   errorCard: {
     borderColor: colors.offlineColor,
@@ -165,11 +167,11 @@ export const globalStyles = StyleSheet.create({
   },
   errorText: {
     //color: colors.main,
-    fontSize: 13,
+    fontSize: 16,
     textAlign: 'center',
-    lineHeight: 13,
+    lineHeight: 18,
   },
-
+  
   // Controls
   controlsContainer: {
     width: '80%',
@@ -195,13 +197,13 @@ export const globalStyles = StyleSheet.create({
   stopButton: {
     backgroundColor: colors.offlineColor,
   },
-   buttonText: {
+  buttonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-
+  
   // ========== INFO ==========
   infoContainer: {
     position: 'absolute',
@@ -214,5 +216,79 @@ export const globalStyles = StyleSheet.create({
     fontWeight: '500',
     fontStyle: 'italic',
   },
-
+  
+  // === Player ===
+  containerLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(18, 18, 18, 0.85)',
+    justifyContent: 'center',
+    alignContent: 'center',
+    zIndex: 100,
+  },
+  textLoadingOverlay: {
+    marginTop: 16,
+    color: colors.liveColor,
+    fontSize: 18,
+    fontWeight: '500',
+    textAlign: 'center'
+  },
+  containerStatusBadge: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  containerReconnectingOverlay: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  containerPlayerControl: {
+    width: '80%',
+    gap: 12,
+    marginBottom: 30,
+  },
+  // TIMER (linearGradient) y Webview
+  containerFlex: {
+    flex: 1,
+  },
+  containerTimerDisplay: {
+    alignItems: 'center',
+    position: 'absolute',
+    top: 180,
+  },
+  timerBox: {
+    width: 140,
+    backgroundColor: colors.TimerDisplay,
+    borderColor: colors.main,
+    borderWidth: 2,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    overflow: 'hidden'
+  },
+  timerText: {
+    zIndex: 2,
+    color: colors.main,
+    fontSize: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  subText: {
+    zIndex: 3,
+    color: colors.darkGrayBgColor,
+    fontSize: 11,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  shine: { // brillo del timer
+    zIndex: 1,
+    position: 'absolute',
+    width: 160,
+    top: 0,
+    bottom: 0,
+    left: 20,
+    //height: 60,
+  },
 });

@@ -19,9 +19,10 @@ export interface PlayerState {
     isLive: boolean;
     isLoading: boolean;
     isPlaying: boolean;
+    isPaused: boolean;
     isReconnecting: boolean;
     maxRetries: number;
-    retryCount: number; // intentos fallidos de reconectar
+    retryCount: number; 
     startTime: Temporal.Instant | null;
     streamUrl: string;
 
@@ -29,6 +30,17 @@ export interface PlayerState {
     // Inicializa stream al abrir la app, y check status en /health
     initializeStream: () => Promise<void>;
     attemptReconnect: () => Promise<void>;
+
+    startPeriodicHeathCheck: () => void;
+    stopPeriodicHealthCheck: () => void;
+    setAdapter: (newAdapter: IStreamAdapter) => void;
+    startPlaybackHealthCheck: () => void;
+    stopPlaybackHealthCheck: () => void; 
+    startOfflineHealthCheck: () => void;
+    stopOfflineHealthCheck: () => void;
+    startErrorHealthCheck: () => void;
+    stopErrorHealthCheck: () => void;
+    
     play: () => void;
     pause: () => void;
     stop: () => void;
@@ -43,11 +55,6 @@ export interface PlayerState {
     startTimer: () => void;
     stopTimer: () => void;
     reset: () => void; 
-    
-    startPeriodicHeathCheck: () => void;
-    stopPeriodicHealthCheck: () => void;
-
-    setAdapter: (newAdapter: IStreamAdapter) => void;
 };
 
 // Respuesta del endpoint /health

@@ -1,10 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import Video from 'react-native-video';
 import { usePlayerStore } from "../hooks/usePlayerStore";
 import { globalStyles } from "../presentation/themes/theme";
 
 export const AudioPlayer: React.FC = () => {
-    const videoRef = useRef<Video>(null);
+    const videoRef = useRef(null);
     const {
         streamUrl,
         isPlaying,

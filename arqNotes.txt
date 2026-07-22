@@ -1,0 +1,73 @@
+App abre
+    ↓
+App.tsx → initializeStream()
+    ↓
+GET /health
+    ├─ publisherConnected = true
+    │   └─ isLive = true
+    │   └─ isCheckingForBroadcast = false
+    │   └─ UI: "🟢 Estamos en VIVO"
+    │
+    └─ publisherConnected = false
+        └─ isLive = false
+        └─ isCheckingForBroadcast = true ✅
+        └─ startOfflineHealthCheck()
+        └─ UI: "No estamos transmitiendo" + pequeño loader
+        └─ Cada 3 segundos: GET /health
+
+Si OBS se inicia:
+    └─ Próximo health check (en máximo 3s) lo detecta
+    └─ isLive = true
+    └─ isCheckingForBroadcast = false
+    └─ stopOfflineHealthCheck()
+    └─ UI actualiza automáticamente a "🟢 Estamos en VIVO"
+
+User toca STOP:
+    └─ stop()
+    └─ stopOfflineHealthCheck()
+    └─ Loader desaparece
+
+-----------------------------------------
+
+Flujo Visual
+
+User toca PLAY
+    ↓
+play() en store
+    ├─ isPlaying = true
+    ├─ startTimer() ← contador comienza
+    └─ startPlaybackHealthCheck() ← inicia revisión cada 3s
+    
+UI:
+    └─ TimerDisplay: ⏱️ 00:05 (contador visible)
+    └─ Botón: PAUSE
+    
+
+Mientras reproduce:
+    Cada 3 segundos:
+    └─ GET /health
+        ├─ publisherConnected = true
+        │   └─ Sigue reproduciendo normalmente ✅
+        │
+        └─ publisherConnected = false
+            └─ ❌ AUTOMÁTICAMENTE:
+                ├─ isPlaying = false (detiene audio)
+                ├─ elapsedTime = 0 (resetea contador)
+                ├─ stopTimer() (detiene incremento)
+                ├─ stopPlaybackHealthCheck() (deja de revisar)
+                ├─ startOfflineHealthCheck() (revisa silenciosamente)
+                └─ UI cambiar a "No estamos transmitiendo"
+                
+
+User ve:
+    └─ Antes: "⏱️ 00:15" + "PAUSE" botón
+    └─ Después: "No estamos transmitiendo" + "PLAY" botón
+    └─ SIN HACER NADA (automático)
+
+
+Si OBS vuelve:
+    └─ offlineHealthCheck cada 3s lo detecta
+    └─ publisherConnected = true
+    └─ startOfflineHealthCheck() se detiene
+    └─ UI vuelve a: "🟢 Estamos en VIVO"
+    └─ User puede tocar PLAY nuevamente

@@ -1,116 +1,79 @@
-import { Text, View, ActivityIndicator, TouchableOpacity } from "react-native"
-import Video from 'react-native-video';
+import { RefreshControl, ScrollView, Text, View } from "react-native"
 import { usePlayerStore } from '../../../hooks/usePlayerStore';
-import { globalStyles } from '../../themes/theme';
+import { colors, globalStyles } from '../../themes/theme';
+import { AudioPlayer } from "../../../components/AudioPlayer";
+import { LoadingOverlay } from "../../../components/LoadingOverlay";
+import { StatusBadge } from "../../../components/StatusBadge";
+import { TimerDisplay } from "../../../components/TimerDisplay";
+import { ReconnectingOverlay } from "../../../components/ReconnectingOverlay";
+import { ErrorMessage } from "../../../components/ErrorMessage";
+import { PlayerControl } from "../../../components/PlayerControl";
+import { useState } from "react";
+
+
 
 interface Props {
 
 }
 
 export const PlayerScreen: React.FC = ({}: Props) => {
-  const { isLive, error, isReconnecting, isPlaying, retryCount, maxRetries, streamUrl, play, pause, stop, setError, setIsBuffering } = usePlayerStore();
+  const { isLive, error, isReconnecting, isPlaying, isPaused, isLoading, retryCount, maxRetries, elapsedTime, play, pause, stop, initializeStream, reset } = usePlayerStore();
+  const [ refreshing, setRefreshing ] = useState(false);
+
+  const handleRefreshing = async () => {
+    setRefreshing(true);
+    reset();
+
+    await new Promise<void>(resolve => setTimeout(resolve, 500));
+
+    await initializeStream();
+
+    setRefreshing(false);
+  };
 
   return (
-    <View style={[
-      globalStyles.mainContainer, 
-      globalStyles.mainContainerCentered
-      ]}>
+    <ScrollView 
+    style={[globalStyles.mainContainer]}
+    contentContainerStyle={globalStyles.mainContainerCentered}
+    refreshControl={
+      <RefreshControl
+      refreshing={refreshing}
+      onRefresh={handleRefreshing}
+      tintColor={colors.liveColor}
+      progressBackgroundColor={colors.background}
+      />
+    }
+    //scrollEnabled={false}
+    > 
+   
+        {/* ===== Nuevo Player ===== */}
+          <TimerDisplay elapsedSeconds={elapsedTime} isPlaying={isPlaying} isPaused={isPaused} />
+          
+          <AudioPlayer />
 
-      {/* ========== AUDIO PLAYER (invisible) ========== */}
-        <Video
-          source={{ uri: streamUrl }}
-          paused={!isPlaying}
-          playInBackground={true}
-          ignoreSilentSwitch="ignore"
-          style={globalStyles.player}
-          onError={(e) => {
-            setError(`Error de reproducción: ${e.error?.errorString ?? 'desconocido'}`);
-            // No llamamos stop() para no desmontar el componente y poder recuperar sin reload
-          }}
-          onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
-          onAudioFocusChanged={(e) => {
-            // En emulador Android, ajustar volumen pierde/recupera el audio focus
-            // Cuando vuelve el focus, reanudamos si estaba reproduciendo
-            if (e.hasAudioFocus) {
-              play();
-            }
-          }}
-        />
-        
-       {/* ========== SECTION 1: STATUS BADGE ========== */}
-      <View style={globalStyles.statusCard}>
-        { isLive ? (
-          <View style={globalStyles.liveBadge}>
-            <Text style={globalStyles.liveText}>🟢 Estamos en VIVO</Text>
+          <LoadingOverlay visible={isLoading} />
+
+          <StatusBadge isLive={isLive} hasError={!!error} />
+
+          <ReconnectingOverlay visible={isReconnecting} retryCount={retryCount} maxRetries={maxRetries} />
+
+          <ErrorMessage error={error} isReconnecting={isReconnecting} />
+
+          {isLive && !error && (
+            <PlayerControl
+            isPlaying={isPlaying}
+            onPlay={play}
+            onPause={pause}
+            onStop={stop}
+            />
+          )}
+
+          <View style={globalStyles.infoContainer}>
+            <Text style={globalStyles.infoText}>
+              {isLive ? 'Escuchá la transmisión en vivo' : 'Aguardando transmisión'}
+            </Text>
           </View>
-        ) : (
-           error === null ? ( 
-            <View style={globalStyles.offlineBadge}>
-            <Text style={globalStyles.offlineText}>❌ No estamos transmitiendo</Text>
-            </View>
-          ) : (
-            ''
-          )
-        )}
-      </View>
-
-      {/* ========== SECTION 2: RECONECTING STATE ========== */}
-      {isReconnecting && (
-        <View style={globalStyles.reconnectingCard}>
-          <ActivityIndicator size="large" color="#1DB954" />
-          <Text style={globalStyles.reconnectingText}>
-            Reconectando... ({retryCount}/{maxRetries})
-          </Text>
-        </View>
-      )}
-
-      {/* ========== SECTION 3: ERROR MESSAGE ========== */}
-      {error && !isReconnecting && (
-        <View style={globalStyles.errorCard}>
-          <Text style={globalStyles.errorText}>{error}</Text>
-        </View>
-      )}
-
-      {/* ========== SECTION 4: PLAYBACK CONTROLS ========== */}
-      {isLive && !error && (
-        <View style={globalStyles.controlsContainer}>
-
-          {
-            !isPlaying ?
-             <TouchableOpacity
-              style={[globalStyles.button, globalStyles.playingButton]}
-              onPress={play}
-              activeOpacity={0.7}
-            >
-              <Text style={globalStyles.buttonText}>▶  PLAY</Text>
-            </TouchableOpacity>
-            :
-            <TouchableOpacity
-              style={[globalStyles.button, globalStyles.grayButton]}
-              onPress={pause}
-              activeOpacity={0.7}
-            >
-              <Text style={globalStyles.buttonText}>PAUSE</Text>
-            </TouchableOpacity>
-          }
-
-            <TouchableOpacity
-              style={[globalStyles.button, globalStyles.stopButton]}
-              onPress={stop}
-              activeOpacity={0.7}
-            >
-              <Text style={globalStyles.buttonText}>STOP</Text>
-            </TouchableOpacity>
-        </View>
-      )}
-
-      {/* ========== INFO ========== */}
-      <View style={globalStyles.infoContainer}>
-        <Text style={globalStyles.infoText}>
-          {isLive ? 'Escuchá la transmisión en vivo' : 'Aguardando transmisión'}
-        </Text>
-      </View>      
-
-    </View>
+       
+    </ScrollView>
   )
 };
