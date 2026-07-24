@@ -1,7 +1,26 @@
+import { useEffect } from "react"
 import { NavigationContainer } from "@react-navigation/native"
 import { AppStack } from "./presentation/navigation/StackNavigation"
+import { usePlayerStore, useUiConfig } from "./hooks/usePlayerStore"
+import { AdapterFactory } from "./adapters/AdapterFactory"
 
-export const App = () => {
+
+// Switch a RTMP - hot changes
+/*
+const rtmpAdapter = AdapterFactory.createAdapter('rtmp');
+usePlayerStore.getState().setAdapter(rtmpAdapter);
+*/
+
+// Switch a HTTP - hot changes
+const httpAdapter = AdapterFactory.createAdapter('http');
+usePlayerStore.getState().setAdapter(httpAdapter);
+
+export const App: React.FC = () => {
+  useEffect(() => {
+    usePlayerStore.getState().initializeStream();
+    useUiConfig.getState().initializeUiConfig();
+  }, [])
+
   return (
     <NavigationContainer>
       <AppStack />

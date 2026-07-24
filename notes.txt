@@ -1,0 +1,25 @@
+src/
+├── stores/
+│   └── playerStore.ts 
+│
+├── hooks/
+│   └── usePlayerStore.ts 
+│
+├── components/
+│   ├── AudioPlayer.tsx
+│   │       Wrapper de Video 
+│   │        (maneja nativo)
+│   │
+│   └── PlayerControls.tsx
+│           Botones play/pause 
+│           (usa hook)
+│
+├── screens/
+│   └── PlayScreen.tsx   
+│
+├── constants/
+│   └── api.ts 
+│         (URLs de backend)
+│
+└── types/
+    └── player.ts  

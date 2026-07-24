@@ -1,10 +1,13 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeSreen } from "../screens/home/HomeScreen";
-import { Player } from "../screens/player/Player";
+import { PlayerScreen } from "../screens/player/PlayerScreen";
 import { RadioPageWV } from "../screens/radioPageWV/RadioPageWV";
 import { Platform } from "react-native";
 import { colors } from "../themes/theme";
 import { Icon } from "../../components/Icon";
+import { ProfileScreen } from "../screens/profile/ProfileScreen";
+import { MessageScreen } from "../screens/message/MessageScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -47,7 +50,13 @@ export const AppBottomTabs = () => {
                 tabBarIcon: ({ color, size }) => <Icon name='home-outline' color={color} size={size} />,
                 sceneStyle:{ backgroundColor: colors.background}
             }}/>
-            <Tab.Screen name='Player' component={Player} 
+            <Tab.Screen name='Message' component={MessageScreen} 
+            options={{
+                title: 'Message',
+                tabBarIcon: ({ color, size }) => <Icon name='mail-outline' color={color} size={size} />,
+                sceneStyle:{ backgroundColor: colors.background}
+            }}/>
+            <Tab.Screen name='Player' component={PlayerScreen} 
             options={{
                 title: 'Play',
                 tabBarIcon: ({ color, size }) => <Icon name='play-outline' color={color} size={size} />,
@@ -57,6 +66,12 @@ export const AppBottomTabs = () => {
             options={{
                 title: 'Radio',
                 tabBarIcon: ({ color, size }) => <Icon name='desktop-outline' color={color} size={size} />,
+                sceneStyle:{ backgroundColor: colors.background}
+            }}/>
+            <Tab.Screen name='Profile' component={ProfileScreen} 
+            options={{
+                title: 'Profile',
+                tabBarIcon: ({ color, size }) => <Icon name='person-outline' color={color} size={size} />,
                 sceneStyle:{ backgroundColor: colors.background}
             }}/>
         </Tab.Navigator>

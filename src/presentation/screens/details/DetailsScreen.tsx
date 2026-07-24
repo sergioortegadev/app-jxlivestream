@@ -1,10 +1,11 @@
+import React from "react"
 import { StackScreenProps } from "@react-navigation/stack";
 import { Text, View } from "react-native";
 import { RootStackParamList } from "../../navigation/StackNavigation";
 
 type Props = StackScreenProps<RootStackParamList, "Details">;
 
-export const DetailsScreen = ({ route }: Props) => {
+export const DetailsScreen: React.FC<Props>  = ({ route }) => {
   const { id } = route.params;
 
   return (

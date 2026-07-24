@@ -1,0 +1,97 @@
+User abre App
+    ↓
+App.tsx → initializeStream()
+    ↓
+    ├─ set({ isLoading: true })
+    ├─ GET /health
+    │
+    ├─ publisherConnected = true
+    │   └─ isLoading = false
+    │   └─ error = null
+    │   └─ isLive = true
+    │   └─ UI: "🟢 Estamos en VIVO"
+    │
+    └─ publisherConnected = false
+        └─ isLoading = false  ✅ (NO muestra loader)
+        └─ error = null  ✅ (NO muestra error)
+        └─ isLive = false
+        └─ UI: "❌ No estamos transmitiendo"
+        └─ startOfflineHealthCheck() ← revisión silenciosa
+
+Si transmisión se inicia:
+    └─ Próximo health check (en máximo 3s) lo detecta
+    └─ isLive = true
+    └─ isCheckingForBroadcast = false
+    └─ stopOfflineHealthCheck()
+    └─ UI actualiza automáticamente a "🟢 Estamos en VIVO"
+
+User toca STOP:
+    └─ stop()
+    └─ stopOfflineHealthCheck()
+    └─ Loader desaparece
+
+-----------------------------------------
+
+
+
+User toca PLAY
+    ↓
+play() en store
+    ├─ isPlaying = true
+    ├─ startTimer()
+    └─ startPlaybackHealthCheck() ← revisa cada 5s
+    
+    UI:
+        ├─ TimerDisplay: 00:05 (contador visible)
+        └─ Botón: PAUSE
+    
+    Si usuario cambia de tab:
+    └─ Video sigue reproduciendo en background
+
+    Si transmisión se detiene UI muestra:
+    └─ Después: "Transmisión interrumpida, intentando reconectar..."
+
+    Mientras reproduce (cada 5 segundos):
+        └─ Health check: GET /health
+            ├─ publisherConnected = true
+            │   └─ Sigue reproduciendo ✅
+            │
+            └─ publisherConnected = false
+                └─ ❌ AUTOMÁTICAMENTE:
+                    ├─ pause() (detiene audio)
+                    ├─ wasPlayingBeforeLoss = true
+                    ├─ error = "Transmisión interrumpida..."
+                    ├─ stopPlaybackHealthCheck()
+                    ├─ startOfflineHealthCheck()
+                    └─ UI muestra error + se intenta reconectar
+
+Si transmisión vuelve:
+    ├─ offlineHealthCheck cada 3s detecta: publisherConnected = true
+    ├─ startOfflineHealthCheck() se detiene
+    ├─ play() automáticamente (porque wasPlayingBeforeLoss = true)
+    ├─ UI vuelve a: "🟢 Estamos en VIVO"
+    └─ La reproducción se reinicia automáticamente
+
+
+------------------------------------------------------------------
+
+Message
+
+Usuario escribe
+        │
+        ▼
+Agregar mensaje al historial
+status = sending
+        │
+        ▼
+onSendMessage()
+        │
+ ┌──────┴────────┐
+ │               │
+ ▼               ▼
+OK             Error
+ │               │
+ ▼               ▼
+sent         failed
+
+------------------------------------------------------------------
