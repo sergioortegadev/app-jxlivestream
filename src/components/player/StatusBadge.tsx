@@ -1,6 +1,6 @@
 import React from "react"
 import { Text, View } from "react-native"
-import { globalStyles } from "../presentation/themes/theme";
+import { globalStyles } from "../../presentation/themes/theme";
 
 interface Props {
     isLive: boolean;
@@ -18,7 +18,7 @@ export const StatusBadge: React.FC<Props> = ({ isLive, hasError }) => {
                 </View>
             ) : (
                 <View style={globalStyles.offlineBadge}>
-          <Text style={globalStyles.offlineText}>No estamos transmitiendo</Text>
+          <Text style={globalStyles.offlineText}>No estamos transmitiendo, o se perdió la transmisión. Aguarde unos minutos y recargue.</Text>
         </View>
             )}
         </View>

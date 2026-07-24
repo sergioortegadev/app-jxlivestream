@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react"
 import { Text, View, Animated, Easing } from "react-native"
-import { globalStyles } from "../presentation/themes/theme";
+import { globalStyles } from "../../presentation/themes/theme";
 import LinearGradient from "react-native-linear-gradient";
 
 const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);

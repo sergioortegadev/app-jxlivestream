@@ -2,18 +2,21 @@ import '@js-temporal/polyfill';
 import { Temporal } from '@js-temporal/polyfill';
 import Config from 'react-native-config';
 import { create } from 'zustand';
-import { HealthResponse, PlayerState } from '../types/player';
+import { PlayerState } from '../types/player';
 import { AdapterFactory, AdapterType } from '../adapters/AdapterFactory';
 import { IStreamAdapter } from '../adapters/types/IStreamAdapter';
+import { UiConfigActions } from '../adapters/types/UiConfigAdapterTypes';
+import { uiConfigType } from '../types/uiConfig';
 
 const ADAPTER_TYPE: AdapterType = Config.ADAPTER_TYPE;
-let adapter: IStreamAdapter = AdapterFactory.createAdapter(ADAPTER_TYPE)
+let adapter: IStreamAdapter = AdapterFactory.createAdapter(ADAPTER_TYPE);
+let uiConfigAdapter: UiConfigActions = AdapterFactory.createUiConfigAdapter();
 
 const RETRY_DELAY_MS = Config.RETRY_DELAY_MS; 
 const MAX_RETRIES = Config.MAX_RETRIES;
 const POLLING_INTERVAL_MS = Config.POLLING_INTERVAL_MS;
 const OFFLINE_CHECK_INTERVAL_MS = 3000;
-const PLAYBACK_HEALTH_CHECK_MS = 3000;
+const PLAYBACK_HEALTH_CHECK_MS = 5000;
 const STREAM_URL = `${Config.HOST}/audio`;
 let pollingInterval: number | null = null;
 let timerInterval: number | null = null;
@@ -21,6 +24,31 @@ let timerInterval: number | null = null;
 let offlineCheckInterval: number | null = null;
 let errorCheckInterval: number | null = null;
 let playbackHealthCheckInterval: number | null = null; 
+
+export const useUiConfig = create<uiConfigType>((set, get) => ({
+    // === Itit UI CONFIG State ===
+
+    title: 'JxLiveStream',
+    subtitle: 'Escucha la transmisión en vivo',
+    description: '',
+
+    // == Actions ==
+    initializeUiConfig: async () => {
+        try {
+            const data = await uiConfigAdapter.checkUiConfig();
+            if(!data) throw new Error(`No se pudo obtener titulo, subtitulo ni descripcion del endpoint ui-config del backend`);
+
+            set({
+                title: data.stationTitle, 
+                subtitle: data.stationSubTitle, 
+                description: data.stationDescription,
+            });
+        } catch (error) {
+            
+        }
+    }
+
+}));
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
 
@@ -39,12 +67,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
      retryCount: 0,
      startTime: null,
      streamUrl: STREAM_URL,
+     wasPlayingBeforeLoss: false,
 
 
     // ========== ACTIONS ==========
     initializeStream: async () => {
         try {
-            set({ isReconnecting: true, error: null });
+            set({ isReconnecting: true, error: null, isLoading: true });
             const data = await adapter.checkHealth();
 
             if(!data) throw new Error(`No se pudo obtener estado del servidor`);
@@ -64,7 +93,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
                     isLive: false,
                     isLoading: false,
                     isReconnecting: false,
-                    error: '  No estamos transmitiendo en este momento',
+                    error: null, // Sin error muestra: No estamos transmitiendo
                 });
             };
         } catch(error) {
@@ -181,83 +210,40 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         console.log(`   [playerStore] Adapter cambiado a: ${adapter.getName()}`);  
     },
 
-    startPlaybackHealthCheck: () => {
-    if (playbackHealthCheckInterval) return;
-
-    console.log('[playerStore] Iniciando health check durante reproducción');
-    
-    playbackHealthCheckInterval = setInterval(async () => {
-      try {
-        const data = await adapter.checkHealth();
-
-        if (!data?.publisherConnected) {
-          // ❌ Transmisión se cayó MIENTRAS estaba reproduciendo
-          console.log('[playerStore] ❌ Transmisión se cayó durante reproducción');
-          
-          // ✅ Detener automáticamente (como si user tocó STOP)
-          set({
-            isLive: false,
-            isPlaying: false,
-            isPaused: false,
-            elapsedTime: 0,
-            startTime: null,
-            error: '❌ Transmisión perdida, espere o recargue en un minuto.',
-          });
-
-          // Detener timer
-          if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-          }
-
-          // Detener este health check
-          get().stopPlaybackHealthCheck();
-          // ✅ Iniciar revisión silenciosa offline
-          get().startOfflineHealthCheck();
-        }
-      } catch (error) {
-        // Error de conexión mientras reproducía
-        console.log('[playerStore] Error en playback health check');
-        get().stopPlaybackHealthCheck();
-        get().startErrorHealthCheck();
-      }
-    }, PLAYBACK_HEALTH_CHECK_MS);        
-    },
-
-    stopPlaybackHealthCheck: () => {
-    if (playbackHealthCheckInterval) {
-      clearInterval(playbackHealthCheckInterval);
-      playbackHealthCheckInterval = null;
-      console.log('[playerStore] Health check reproducción detenido');            
-    }
-    },
-
     startOfflineHealthCheck: () => {
-    if (offlineCheckInterval) return;
+        if (offlineCheckInterval) return;
 
-    console.log('[playerStore] Iniciando check offline silencioso (cada 3s)');
-    
-    offlineCheckInterval = setInterval(async () => {
-        try {
-        const data = await adapter.checkHealth();
+        console.log('[playerStore] Iniciando check offline silencioso (cada 3s)');
+        
+        offlineCheckInterval = setInterval(async () => {
+            try {
+                const data = await adapter.checkHealth();
 
-        if (data?.publisherConnected) {
-            console.log('[playerStore] ✅ Transmisión iniciada');
+                if (data?.publisherConnected) {
+                    console.log('[playerStore] ✅ Transmisión iniciada');
 
-            set({
-            isLive: true,
-            error: null,
-            retryCount: 0,
-            });
+                    const state = get();
 
+                    set({
+                    isLive: true,
+                    error: null,
+                    retryCount: 0,
+                    });
+
+                    if (state.wasPlayingBeforeLoss) {
+                        console.log('[playerStore] Reanudando reproducción automáticamente');
+                        get().play();
+                        set({ wasPlayingBeforeLoss: false });                
+                    }
+
+                    get().stopOfflineHealthCheck();
+                }
+            } catch (error) {
+            // Si hay error aquí, cambiar a revisión de error
             get().stopOfflineHealthCheck();
-        }
-        } catch (error) {
-        // Si hay error aquí, cambiar a revisión de error
-        get().stopOfflineHealthCheck();
-        get().startErrorHealthCheck();
-        }
-    }, OFFLINE_CHECK_INTERVAL_MS);        
+            get().startErrorHealthCheck();
+            }
+        }, OFFLINE_CHECK_INTERVAL_MS);        
     },
 
     stopOfflineHealthCheck: () => {
@@ -266,6 +252,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         offlineCheckInterval = null;
         console.log('[playerStore] Health check offline detenido');            
     }
+    },
+
+    setWasPlayingBeforeLoss: (was: boolean) => {
+        set({wasPlayingBeforeLoss: was});
     },
 
     startErrorHealthCheck: () => {
@@ -312,19 +302,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     play: () => {
         set({ isPlaying: true, isPaused: false });
         get().startTimer();
-        get().startPlaybackHealthCheck();
+        get().startPlaybackHealthCheck();  
     },
 
     pause: () => {
         set({ isPlaying: false, isPaused: true });
         get().stopTimer();
-        get().stopPlaybackHealthCheck();
+         get().stopPlaybackHealthCheck(); 
     },
 
     stop: () => {
-        set({ isPlaying: false, isPaused: false });
+        set({ isPlaying: false, isPaused: false, wasPlayingBeforeLoss: false });
         get().stopPeriodicHealthCheck();
-        get().stopPlaybackHealthCheck();
+        get().stopPlaybackHealthCheck(); 
         get().stopOfflineHealthCheck();
         get().stopErrorHealthCheck();
         get().stopTimer();
@@ -382,11 +372,62 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         set({ elapsedTime: 0, startTime: null });
     },
 
+    startPlaybackHealthCheck: () => {
+        if (playbackHealthCheckInterval) return;
+
+        console.log('[playerStore] Iniciando health check durante reproducción');
+        
+        playbackHealthCheckInterval = setInterval(async () => {
+        const state = get();
+        
+        // Solo revisar si está reproduciendo
+        if (!state.isPlaying) {
+            get().stopPlaybackHealthCheck();
+            return;
+        }
+
+        try {
+            const data = await adapter.checkHealth();
+
+            if (!data?.publisherConnected) {
+                // ❌ Transmisión se cayó MIENTRAS reproducía
+                console.log('[playerStore] ❌ Transmisión perdida durante reproducción');
+                
+                // ✅ Pausar automáticamente
+                set({
+                    isPlaying: false,
+                    isPaused: true,
+                    wasPlayingBeforeLoss: true,
+                    error: 'Transmisión perdida, intentando reconectar...',
+                });
+
+                // Detener este health check
+                get().stopPlaybackHealthCheck();
+
+                // Iniciar revisión silenciosa offline
+                get().startOfflineHealthCheck();
+            }
+        } catch (error) {
+            console.log('[playerStore] Error en playback health check');
+            get().stopPlaybackHealthCheck();
+            get().startErrorHealthCheck();
+        }
+        }, PLAYBACK_HEALTH_CHECK_MS);        
+    },
+
+    stopPlaybackHealthCheck: () => {
+        if (playbackHealthCheckInterval) {
+            clearInterval(playbackHealthCheckInterval);
+            playbackHealthCheckInterval = null;
+            console.log('[playerStore] Health check reproducción detenido');            
+        }
+    },
+
 
     // Reset
     reset: () => {
         get().stopPeriodicHealthCheck();
-        get().stopPlaybackHealthCheck();
+        get().stopPlaybackHealthCheck(); 
         get().stopOfflineHealthCheck();
         get().stopErrorHealthCheck();
         get().stopTimer();
@@ -402,6 +443,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             retryCount: 0,
             elapsedTime: 0,
             startTime: null,
+            wasPlayingBeforeLoss: false,
         });
     },
     }));

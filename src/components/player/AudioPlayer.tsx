@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import Video from 'react-native-video';
-import { usePlayerStore } from "../hooks/usePlayerStore";
-import { globalStyles } from "../presentation/themes/theme";
+import { usePlayerStore } from "../../hooks/usePlayerStore";
+import { globalStyles } from "../../presentation/themes/theme";
 
 export const AudioPlayer: React.FC = () => {
     const videoRef = useRef(null);
@@ -11,14 +11,22 @@ export const AudioPlayer: React.FC = () => {
         setError,
         setIsBuffering,
         setIsLoading,
-        play,
+        pause,
+        setWasPlayingBeforeLoss,
+        startPlaybackHealthCheck,
     } = usePlayerStore();
 
     /*
      * Listeners de video component
      */ 
     const handleOnError = (error: any) => {
-        console.error(`[AudioPlayer] Video error: ${error}`);
+        console.error(`[AudioPlayer] error: `, error);
+
+        if (isPlaying) {
+            setWasPlayingBeforeLoss(true);
+            pause();
+        }
+        
         setError(`Error de reproducción: ${error.error?.errorString ?? 'Desconocido'}`);
     };
 
@@ -32,10 +40,11 @@ export const AudioPlayer: React.FC = () => {
 
     const handleOnLoad = () => {
         setIsLoading(false)
+        startPlaybackHealthCheck();
     };
 
     const handleOnAudioFocusChanged = (e: any) => {
-        if(e.hasAudioFocus && isPlaying) play();
+        if(e.hasAudioFocus && isPlaying) {}
     };
 
     return (

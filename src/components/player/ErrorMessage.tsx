@@ -1,6 +1,6 @@
 import React from "react"
 import { Text, View } from "react-native"
-import { globalStyles } from "../presentation/themes/theme";
+import { globalStyles } from "../../presentation/themes/theme";
 
 interface Props {
     error: string | null;

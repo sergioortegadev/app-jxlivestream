@@ -1,22 +1,17 @@
+import React from "react"
 import { RefreshControl, ScrollView, Text, View } from "react-native"
 import { usePlayerStore } from '../../../hooks/usePlayerStore';
 import { colors, globalStyles } from '../../themes/theme';
-import { AudioPlayer } from "../../../components/AudioPlayer";
-import { LoadingOverlay } from "../../../components/LoadingOverlay";
-import { StatusBadge } from "../../../components/StatusBadge";
-import { TimerDisplay } from "../../../components/TimerDisplay";
-import { ReconnectingOverlay } from "../../../components/ReconnectingOverlay";
-import { ErrorMessage } from "../../../components/ErrorMessage";
-import { PlayerControl } from "../../../components/PlayerControl";
+import { AudioPlayer } from "../../../components/player/AudioPlayer";
+import { LoadingOverlay } from "../../../components/player/LoadingOverlay";
+import { StatusBadge } from "../../../components/player/StatusBadge";
+import { TimerDisplay } from "../../../components/player/TimerDisplay";
+import { ReconnectingOverlay } from "../../../components/player/ReconnectingOverlay";
+import { ErrorMessage } from "../../../components/player/ErrorMessage";
+import { PlayerControl } from "../../../components/player/PlayerControl";
 import { useState } from "react";
 
-
-
-interface Props {
-
-}
-
-export const PlayerScreen: React.FC = ({}: Props) => {
+export const PlayerScreen: React.FC = () => {
   const { isLive, error, isReconnecting, isPlaying, isPaused, isLoading, retryCount, maxRetries, elapsedTime, play, pause, stop, initializeStream, reset } = usePlayerStore();
   const [ refreshing, setRefreshing ] = useState(false);
 

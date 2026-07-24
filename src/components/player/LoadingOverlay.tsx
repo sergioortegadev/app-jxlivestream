@@ -1,6 +1,6 @@
 import React from "react"
 import { ActivityIndicator, Text, View } from "react-native"
-import { colors, globalStyles } from "../presentation/themes/theme";
+import { colors, globalStyles } from "../../presentation/themes/theme";
 
 interface Props {
     visible: boolean;

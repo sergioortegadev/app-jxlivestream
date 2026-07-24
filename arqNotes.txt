@@ -1,21 +1,24 @@
-App abre
+User abre App
     ↓
 App.tsx → initializeStream()
     ↓
-GET /health
+    ├─ set({ isLoading: true })
+    ├─ GET /health
+    │
     ├─ publisherConnected = true
+    │   └─ isLoading = false
+    │   └─ error = null
     │   └─ isLive = true
-    │   └─ isCheckingForBroadcast = false
     │   └─ UI: "🟢 Estamos en VIVO"
     │
     └─ publisherConnected = false
+        └─ isLoading = false  ✅ (NO muestra loader)
+        └─ error = null  ✅ (NO muestra error)
         └─ isLive = false
-        └─ isCheckingForBroadcast = true ✅
-        └─ startOfflineHealthCheck()
-        └─ UI: "No estamos transmitiendo" + pequeño loader
-        └─ Cada 3 segundos: GET /health
+        └─ UI: "❌ No estamos transmitiendo"
+        └─ startOfflineHealthCheck() ← revisión silenciosa
 
-Si OBS se inicia:
+Si transmisión se inicia:
     └─ Próximo health check (en máximo 3s) lo detecta
     └─ isLive = true
     └─ isCheckingForBroadcast = false
@@ -29,45 +32,66 @@ User toca STOP:
 
 -----------------------------------------
 
-Flujo Visual
+
 
 User toca PLAY
     ↓
 play() en store
     ├─ isPlaying = true
-    ├─ startTimer() ← contador comienza
-    └─ startPlaybackHealthCheck() ← inicia revisión cada 3s
+    ├─ startTimer()
+    └─ startPlaybackHealthCheck() ← revisa cada 5s
     
-UI:
-    └─ TimerDisplay: ⏱️ 00:05 (contador visible)
-    └─ Botón: PAUSE
+    UI:
+        ├─ TimerDisplay: 00:05 (contador visible)
+        └─ Botón: PAUSE
     
+    Si usuario cambia de tab:
+    └─ Video sigue reproduciendo en background
 
-Mientras reproduce:
-    Cada 3 segundos:
-    └─ GET /health
-        ├─ publisherConnected = true
-        │   └─ Sigue reproduciendo normalmente ✅
+    Si transmisión se detiene UI muestra:
+    └─ Después: "Transmisión interrumpida, intentando reconectar..."
+
+    Mientras reproduce (cada 5 segundos):
+        └─ Health check: GET /health
+            ├─ publisherConnected = true
+            │   └─ Sigue reproduciendo ✅
+            │
+            └─ publisherConnected = false
+                └─ ❌ AUTOMÁTICAMENTE:
+                    ├─ pause() (detiene audio)
+                    ├─ wasPlayingBeforeLoss = true
+                    ├─ error = "Transmisión interrumpida..."
+                    ├─ stopPlaybackHealthCheck()
+                    ├─ startOfflineHealthCheck()
+                    └─ UI muestra error + se intenta reconectar
+
+Si transmisión vuelve:
+    ├─ offlineHealthCheck cada 3s detecta: publisherConnected = true
+    ├─ startOfflineHealthCheck() se detiene
+    ├─ play() automáticamente (porque wasPlayingBeforeLoss = true)
+    ├─ UI vuelve a: "🟢 Estamos en VIVO"
+    └─ La reproducción se reinicia automáticamente
+
+
+------------------------------------------------------------------
+
+Message
+
+Usuario escribe
         │
-        └─ publisherConnected = false
-            └─ ❌ AUTOMÁTICAMENTE:
-                ├─ isPlaying = false (detiene audio)
-                ├─ elapsedTime = 0 (resetea contador)
-                ├─ stopTimer() (detiene incremento)
-                ├─ stopPlaybackHealthCheck() (deja de revisar)
-                ├─ startOfflineHealthCheck() (revisa silenciosamente)
-                └─ UI cambiar a "No estamos transmitiendo"
-                
+        ▼
+Agregar mensaje al historial
+status = sending
+        │
+        ▼
+onSendMessage()
+        │
+ ┌──────┴────────┐
+ │               │
+ ▼               ▼
+OK             Error
+ │               │
+ ▼               ▼
+sent         failed
 
-User ve:
-    └─ Antes: "⏱️ 00:15" + "PAUSE" botón
-    └─ Después: "No estamos transmitiendo" + "PLAY" botón
-    └─ SIN HACER NADA (automático)
-
-
-Si OBS vuelve:
-    └─ offlineHealthCheck cada 3s lo detecta
-    └─ publisherConnected = true
-    └─ startOfflineHealthCheck() se detiene
-    └─ UI vuelve a: "🟢 Estamos en VIVO"
-    └─ User puede tocar PLAY nuevamente
+------------------------------------------------------------------

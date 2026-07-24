@@ -1,8 +1,9 @@
 import { useEffect } from "react"
 import { NavigationContainer } from "@react-navigation/native"
 import { AppStack } from "./presentation/navigation/StackNavigation"
-import { usePlayerStore } from "./hooks/usePlayerStore"
+import { usePlayerStore, useUiConfig } from "./hooks/usePlayerStore"
 import { AdapterFactory } from "./adapters/AdapterFactory"
+
 
 // Switch a RTMP - hot changes
 /*
@@ -17,6 +18,7 @@ usePlayerStore.getState().setAdapter(httpAdapter);
 export const App: React.FC = () => {
   useEffect(() => {
     usePlayerStore.getState().initializeStream();
+    useUiConfig.getState().initializeUiConfig();
   }, [])
 
   return (

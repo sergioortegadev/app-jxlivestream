@@ -25,6 +25,7 @@ export interface PlayerState {
     retryCount: number; 
     startTime: Temporal.Instant | null;
     streamUrl: string;
+    wasPlayingBeforeLoss: boolean;
 
     // ==== Actions ====
     // Inicializa stream al abrir la app, y check status en /health
@@ -35,7 +36,7 @@ export interface PlayerState {
     stopPeriodicHealthCheck: () => void;
     setAdapter: (newAdapter: IStreamAdapter) => void;
     startPlaybackHealthCheck: () => void;
-    stopPlaybackHealthCheck: () => void; 
+    stopPlaybackHealthCheck: () => void;
     startOfflineHealthCheck: () => void;
     stopOfflineHealthCheck: () => void;
     startErrorHealthCheck: () => void;
@@ -55,6 +56,8 @@ export interface PlayerState {
     startTimer: () => void;
     stopTimer: () => void;
     reset: () => void; 
+
+    setWasPlayingBeforeLoss: (was: boolean) => void;
 };
 
 // Respuesta del endpoint /health

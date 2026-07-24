@@ -1,13 +1,10 @@
+import React from "react";
 import { ActivityIndicator, Text } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import { globalStyles } from "../../themes/theme";
 
-interface Props {
-
-}
-
-export const RadioPageWV = ({}: Props) => {
+export const RadioPageWV: React.FC = () => {
   return (
     <SafeAreaView 
     style={globalStyles.containerFlex}
