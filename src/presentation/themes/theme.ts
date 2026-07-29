@@ -1,28 +1,14 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { TimerDisplay } from '../../components/player/TimerDisplay';
 
-export interface ThemeColors {
-  main: string,
-  primary: string;
-  secondary: string,
-  text: string;
-  background: string;
-  cardBackground: string;
-  buttonTextColor: string;
-  blueBtn: string,
-  liveColor: string;
-  offlineColor: string;
-  grayBgColor: string;
-  darkGrayBgColor: string;
-  TimerDisplay: string;
-}
 
-export const colors: ThemeColors = {
+export const colors = {
   main: '#219bff',
   primary: "#5856D6",
   secondary: '#b3974b',
   text: "black",
-  background: "#F3F2F7",
+  background: "#e8e8ec",
+  backgroundBlue: '#4C60CB',
   cardBackground: "white",
   buttonTextColor: "white",
 
@@ -64,7 +50,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   btnPrimary: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.blueBtn,
     borderRadius: 10,
     padding: 10,
     alignItems: "center",
@@ -79,6 +65,26 @@ export const globalStyles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     backgroundColor: colors.cardBackground
+  },
+
+  // ===== Splash Screen ====
+  splashScreenContainer: {
+    flex: 1,
+    backgroundColor: colors.backgroundBlue, // Mismo color de fondo splashBackground en android/app/src/main/res/values/colors.xml
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  splashImage: {
+    position: 'absolute',
+    top: 0,
+  },
+  splashTextDev: {
+    position: 'absolute',
+    bottom: 50,
+    color: '#fff',
+    fontWeight: 400,
+    fontSize: 16,
   },
 
   // ======= Home Screen =====
@@ -178,6 +184,25 @@ export const globalStyles = StyleSheet.create({
 
   
   // PlayerScreen
+  playerContainer: {
+    flex: 1,
+    backgroundColor: colors.blueBtn
+  },
+  playerContainerCentered: {
+    flexGrow: 1,
+  },
+  playerBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 100,
+    marginHorizontal: 25,
+    paddingTop: 350,
+    paddingBottom: 35,
+    paddingHorizontal: 35,
+    backgroundColor: colors.background,
+    borderRadius: 25,
+  },
   player: {
     width: 0,
     height: 0,
@@ -215,7 +240,13 @@ export const globalStyles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  
+  // Sound Animation
+  soundAnimation: {
+    alignItems: 'center',
+    position: 'absolute',
+    top: 150,
+  },
+
   // Reconnecting
   reconnectingCard: {
     alignItems: 'center',
@@ -245,6 +276,25 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+
+  // Status info (no error)
+  statusMessageCard: {
+    borderColor: colors.liveColor,
+    backgroundColor: '#eafaf1',
+    borderWidth: 1,
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderLeftWidth: 10,
+    borderLeftColor: colors.liveColor,
+  },
+  statusMessageText: {
+    color: '#1a6e3c',
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
   
   // Controls
   controlsContainer: {
@@ -253,7 +303,6 @@ export const globalStyles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
     shadowColor: '#000',
@@ -261,6 +310,9 @@ export const globalStyles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    paddingVertical: 16,
+    marginVertical: 4,
+    width: 150,
   },
   playingButton: {
     backgroundColor: colors.blueBtn,
@@ -311,16 +363,19 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'center'
   },
   containerStatusBadge: {
+    position: 'absolute',
     alignItems: 'center',
-    marginBottom: 40,
+    top: 40,
   },
+  
   containerReconnectingOverlay: {
     alignItems: 'center',
     marginBottom: 30,
   },
   containerPlayerControl: {
+    alignItems: 'center',
     width: '80%',
-    gap: 12,
+    gap: 8,
     marginBottom: 30,
   },
   // TIMER (linearGradient) y Webview
@@ -330,7 +385,7 @@ export const globalStyles = StyleSheet.create({
   containerTimerDisplay: {
     alignItems: 'center',
     position: 'absolute',
-    top: 150,
+    top: 250,
   },
   timerBox: {
     width: 140,
@@ -449,7 +504,7 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: '#EEE',
   },
   messageButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.blueBtn,
     borderRadius: 24,
     width: 60,
     height: 42,

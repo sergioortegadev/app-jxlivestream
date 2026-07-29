@@ -16,7 +16,7 @@ const RETRY_DELAY_MS = Config.RETRY_DELAY_MS;
 const MAX_RETRIES = Config.MAX_RETRIES;
 const POLLING_INTERVAL_MS = Config.POLLING_INTERVAL_MS;
 const OFFLINE_CHECK_INTERVAL_MS = 3000;
-const PLAYBACK_HEALTH_CHECK_MS = 5000;
+const PLAYBACK_HEALTH_CHECK_MS = 7000;
 const STREAM_URL = `${Config.HOST}/audio`;
 let pollingInterval: number | null = null;
 let timerInterval: number | null = null;
@@ -64,8 +64,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
      isPaused: false,
      isReconnecting: false,
      maxRetries: MAX_RETRIES,
+     playerKey: 0,
      retryCount: 0,
      startTime: null,
+     statusMessage: null,
      streamUrl: STREAM_URL,
      wasPlayingBeforeLoss: false,
 
@@ -224,19 +226,29 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
                     const state = get();
 
+                    // Detener polling antes de cambiar estado
+                    get().stopOfflineHealthCheck();
+
                     set({
-                    isLive: true,
-                    error: null,
-                    retryCount: 0,
+                        isLive: true,
+                        error: null,
+                        retryCount: 0,
+                        statusMessage: 'Transmisión detectada, comenzando a recibir audio, espere un instante por favor',
                     });
 
-                    if (state.wasPlayingBeforeLoss) {
-                        console.log('[playerStore] Reanudando reproducción automáticamente');
-                        get().play();
-                        set({ wasPlayingBeforeLoss: false });                
-                    }
+                    // Forzar re-mount del componente Video para vaciar chunks viejos del buffer
+                    get().bumpPlayerKey();
 
-                    get().stopOfflineHealthCheck();
+                    if (state.wasPlayingBeforeLoss) {
+                        console.log('[playerStore] Reanudando reproducción tras vaciar buffer (espera 2s)');
+                        // Esperar que lleguen chunks frescos antes de dar play
+                        setTimeout(() => {
+                            get().play();
+                            set({ wasPlayingBeforeLoss: false, statusMessage: null });
+                        }, 5000);
+                    } else {
+                        setTimeout(() => set({ statusMessage: null }), 7000);
+                    }
                 }
             } catch (error) {
             // Si hay error aquí, cambiar a revisión de error
@@ -257,6 +269,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     setWasPlayingBeforeLoss: (was: boolean) => {
         set({wasPlayingBeforeLoss: was});
     },
+
+    bumpPlayerKey: () => set(state => ({ playerKey: state.playerKey + 1 })),
+
+    setStatusMessage: (msg: string | null) => set({ statusMessage: msg }),
 
     startErrorHealthCheck: () => {
     if (errorCheckInterval) return;
@@ -397,9 +413,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
                 set({
                     isPlaying: false,
                     isPaused: true,
+                    isLive: false,
                     wasPlayingBeforeLoss: true,
                     error: 'Transmisión perdida, intentando reconectar...',
                 });
+
+                get().stopTimer();
 
                 // Detener este health check
                 get().stopPlaybackHealthCheck();
@@ -440,9 +459,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             isBuffering: false,
             isReconnecting: false,
             error: null,
+            playerKey: 0,
             retryCount: 0,
             elapsedTime: 0,
             startTime: null,
+            statusMessage: null,
             wasPlayingBeforeLoss: false,
         });
     },

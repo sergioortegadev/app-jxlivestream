@@ -78,9 +78,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.appjxlivestream"
+    namespace "app.sergioortegadev.jxlivestream"
     defaultConfig {
-        applicationId "com.appjxlivestream"
+        applicationId "app.sergioortegadev.jxlivestream"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -108,9 +108,15 @@ android {
     }
 }
 
+configurations.all {
+    exclude group: "com.android.support"
+}
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    // Splash screen (Google oficial)
+    implementation("androidx.core:core-splashscreen:1.0.0")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
