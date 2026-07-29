@@ -8,6 +8,7 @@ export const AudioPlayer: React.FC = () => {
     const {
         streamUrl,
         isPlaying,
+        playerKey,
         setError,
         setIsBuffering,
         setIsLoading,
@@ -49,6 +50,7 @@ export const AudioPlayer: React.FC = () => {
 
     return (
         <Video
+        key={playerKey}
         ref={videoRef}
         source={{ uri: streamUrl }}
         paused={!isPlaying}

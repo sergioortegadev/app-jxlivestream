@@ -22,12 +22,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeFactory = factory
 
     window = UIWindow(frame: UIScreen.main.bounds)
+    window?.backgroundColor = UIColor(red: 0.30, green: 0.38, blue: 0.80, alpha: 1.0)
 
     factory.startReactNative(
       withModuleName: "AppJxlivestream",
       in: window,
       launchOptions: launchOptions
     )
+
+    RNSplashScreen.show()
 
     return true
   }

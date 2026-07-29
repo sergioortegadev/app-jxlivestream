@@ -22,8 +22,10 @@ export interface PlayerState {
     isPaused: boolean;
     isReconnecting: boolean;
     maxRetries: number;
+    playerKey: number; // incrementar fuerza re-mount del Video (limpia buffer)
     retryCount: number; 
     startTime: Temporal.Instant | null;
+    statusMessage: string | null; // mensaje informativo (no error)
     streamUrl: string;
     wasPlayingBeforeLoss: boolean;
 
@@ -58,6 +60,8 @@ export interface PlayerState {
     reset: () => void; 
 
     setWasPlayingBeforeLoss: (was: boolean) => void;
+    bumpPlayerKey: () => void;
+    setStatusMessage: (msg: string | null) => void;
 };
 
 // Respuesta del endpoint /health

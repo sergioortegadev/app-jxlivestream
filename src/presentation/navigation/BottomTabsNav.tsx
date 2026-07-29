@@ -8,10 +8,12 @@ import { colors } from "../themes/theme";
 import { Icon } from "../../components/Icon";
 import { ProfileScreen } from "../screens/profile/ProfileScreen";
 import { MessageScreen } from "../screens/message/MessageScreen";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 
 export const AppBottomTabs = () => {
+    const insets = useSafeAreaInsets();
 
     return (
         <Tab.Navigator
@@ -24,9 +26,9 @@ export const AppBottomTabs = () => {
                 backgroundColor: '#ffc',
             },
             tabBarStyle: {
-                marginBottom: Platform.OS === 'android' ? 50 : 0,
-                height: 20,
-                paddingBottom: Platform.OS === 'android' ? 50 : 60,
+                backgroundColor: colors.background,
+                height: insets.bottom,
+                paddingBottom: Platform.OS === 'ios' ? 30 + insets.bottom : 45 + insets.bottom,
             },
             tabBarShowLabel: false,
             /* tabBarLabelStyle: {

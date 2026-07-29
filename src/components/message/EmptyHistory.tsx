@@ -16,6 +16,8 @@ export const EmptyHistory: React.FC = () => {
         <Text style={globalStyles.messageHistPlaceholder}>
         Los mensajes enviados durante esta sesión aparecerán aquí.
         </Text>
+
+        <Text style={globalStyles.messageSubTitle}>Esta función estará disponible en futuras actualizaciones</Text> 
     </View>
   )
 }

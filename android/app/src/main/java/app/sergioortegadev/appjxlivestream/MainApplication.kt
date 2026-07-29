@@ -1,4 +1,4 @@
-package com.appjxlivestream
+package app.sergioortegadev.jxlivestream
 
 import android.app.Application
 import com.facebook.react.PackageList

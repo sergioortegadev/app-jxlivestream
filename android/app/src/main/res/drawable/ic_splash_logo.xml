@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+
+    <!-- Fondo circular -->
+    <path
+        android:fillColor="#8C3AE9"
+        android:pathData="
+            M64,4
+            C97.1371,4 124,30.8629 124,64
+            C124,97.1371 97.1371,124 64,124
+            C30.8629,124 4,97.1371 4,64
+            C4,30.8629 30.8629,4 64,4
+            Z" />
+
+    <!-- Onda superior -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M32,48 C47,38 81,38 96,48" />
+
+    <!-- Onda central -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M40,64 C51,57 77,57 88,64" />
+
+    <!-- Onda inferior -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFF00"
+        android:strokeWidth="10"
+        android:strokeLineCap="round"
+        android:pathData="M50,80 C56,76 72,76 78,80" />
+
+</vector>
