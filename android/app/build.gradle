@@ -73,6 +73,14 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// Diferente con la docu oficial para no subir al repo las claves en gradle.properties se crea gradle.local.properties (ignored)
+// Cargar propiedades locales sensibles si el archivo existe
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('gradle.local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -93,6 +101,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (localProperties.getProperty('MYAPP_UPLOAD_STORE_FILE') != null) {
+                storeFile file(localProperties.getProperty('MYAPP_UPLOAD_STORE_FILE'))
+                storePassword localProperties.getProperty('MYAPP_UPLOAD_STORE_PASSWORD')
+                keyAlias localProperties.getProperty('MYAPP_UPLOAD_KEY_ALIAS')
+                keyPassword localProperties.getProperty('MYAPP_UPLOAD_KEY_PASSWORD')
+            }
+        }
     }
     buildTypes {
         debug {
@@ -101,7 +117,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
